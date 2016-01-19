@@ -143,7 +143,7 @@ void draw(){
      for(int i=0; i<x.length; i++)       
         sell(x[i]['price'], x[i]['quantity'],90,(x[i]['owner']=={{=auth.user.id}})?(x[i]['oid']):false);
   } catch(e) {};
-  strokeWeight(4);
+  strokeWeight(4);			     
   try {
      var new_oid=received_data['oid'];
      if(oid!=new_oid) {

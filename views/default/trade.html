@@ -2,12 +2,14 @@
 {{response.files.append(URL('static','js/processing.init.js'))}}
 {{extend 'layout.html'}}
 <script type="text/javascript" charset="utf-8">
-    var received_data=null;
-    $(document).ready(function(){
-       received_data={};
-       if(!web2py_comet("{{=product.ws_url}}",function(e){received_data=eval('('+e.data+')');}))
-          alert("WebSocket not supported");
-    });
+  var received_data=null;
+  $(document).ready(function(){
+    received_data={};
+    if(!web2py_comet("{{=product.ws_url}}",function(e){
+       received_data=eval('('+e.data+')');
+    }))
+    alert("WebSocket not supported");
+  });
 </script>
 
 <h2>Product: {{=product.name}}</h2>
@@ -15,7 +17,7 @@
 {{=A('P&L',_href=URL('pandl',args=product.id),_target="pandl")}}
 
 <center>
-<script type="application/processing">
+<script type="application/processing" >
 // Global variables  
 float radius = 50.0;  
 int X, Y;  
@@ -36,7 +38,7 @@ var box = 180;
 void setup(){  
   size( width, height );  
   strokeWeight( 1 );  
-  frameRate( 15 );  
+  frameRate( 24 );  
 }  
 void buy(p,q,o,me) {
      if(me) {
@@ -91,6 +93,8 @@ void draw(){
   line(5+box,5+box,5,5+box);
   line(5,5+box,5,5);
   textSize(16);
+
+
   if(state=="buy market") fill(0,255,0); else fill(255,255,255); 
   text("buy market",30,200);
   rect(10,190,10,10);
@@ -116,8 +120,11 @@ void draw(){
   text("sell stop limit",30,340);
   rect(10,330,10,10);
   noStroke();
+
   try {
+    console.log(received_data['state']);
      var price = received_data['state']['price'];
+     console.log(price);
      var d=width/(price*2);
      xscale+=(d-xscale)/100;
      var x=received_data['state']['mo_buy'];
@@ -132,7 +139,7 @@ void draw(){
      sell(price, quantity, 255, false);
      for(int i=0; i<x.length; i++) if(x[i]['owner']=={{=auth.user.id}})
        sell(price, x[i]['quantity'], 255, x[i]['oid']);
-  } catch(e) {};
+  } catch(e) {console.log(e);};
   try {
      var x=received_data['state']['lo_buy'];
      for(int i=0; i<x.length; i++)
@@ -143,7 +150,7 @@ void draw(){
      for(int i=0; i<x.length; i++)       
         sell(x[i]['price'], x[i]['quantity'],90,(x[i]['owner']=={{=auth.user.id}})?(x[i]['oid']):false);
   } catch(e) {};
-  strokeWeight(4);
+  strokeWeight(4);			     
   try {
      var new_oid=received_data['oid'];
      if(oid!=new_oid) {
@@ -188,7 +195,7 @@ void mousePressed() {
      else if(mouseY>290 && mouseY<300) state="sell limit";
      else if(mouseY>310 && mouseY<320) state="sell stop market";
      else if(mouseY>330 && mouseY<340) state="sell stop limit";
-     else state=null;			       
+     else state=null;
   } else if(state!=null) {
      nX = mouseX;
   }

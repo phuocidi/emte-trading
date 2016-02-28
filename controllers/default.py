@@ -31,7 +31,6 @@ def send(url,order):
     data= f.read()
     f.close()
     return data
-        
 
 @auth.requires_login()
 def trade():
@@ -50,7 +49,7 @@ def order():
                              product=product.id,
                              quantity=request.vars.quantity,
                              price=request.vars.price,
-                             stop_price=request.vars.stop_price,                             
+                             stop_price=request.vars.stop_price,
                              oid=oid)
     #if request.vars.type=='buy':
     #    db(db.auth_user.id==auth.user.id).update(virtual_cash=db.auth_user.virtual_cash-request.vars.price*form.vars.quantity)
@@ -115,4 +114,3 @@ def trade_form():
         #    db(db.auth_user.id==auth.user.id).update(virtual_cash=db.auth_user.virtual_cash-form.vars.price*form.vars.quantity)
         response.js = "jQuery('.flash').html('your order %s was submitted').slideDown()" % order
     return form
-

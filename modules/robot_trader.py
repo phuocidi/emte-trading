@@ -24,10 +24,13 @@ def start_robot(url,owner=0,hmac_key='secret',wait_time=1):
         t0 = time.time()
         price = float(urllib.urlopen(url+'/quote').read())
         order = robot_order(price,owner)
+        print '*********\t',order
         signature = hmac_key and hmac.new(hmac_key,order).hexdigest() or ''
         params = urllib.urlencode({'order': order, 'signature': signature})
         f = urllib.urlopen(url, params)
         oid = int(f.read())
+        f.close()
+        print url,' -------',params
         print "order #%i from %s (%fseconds)" % (oid,order,time.time()-t0)
         time.sleep(float(wait_time))
 
@@ -57,8 +60,3 @@ if __name__=='__main__':
                       help='time between two trades in seconds')
     (options, args) = parser.parse_args()
     start_robot('http://127.0.0.1:%s' % options.port,owner=options.owner,hmac_key=options.hmac_key,wait_time=options.wait_time)
-        
-
-        
-    
-    

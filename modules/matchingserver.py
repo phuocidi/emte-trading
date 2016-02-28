@@ -2,7 +2,6 @@
 # example based on http://thomas.pelletier.im/2010/08/websocket-tornado-redis/
 
 hmac_key = 'secret'
-
 import tornado.httpserver
 import tornado.websocket
 import tornado.ioloop
@@ -41,6 +40,7 @@ class Engine:
 
     def __init__(self,ticker,price=100.0,logfilename=None):
         self.logfile = open(logfilename or ticker+'.log','a')
+        print self.logfile,'\n'
         self.price = price  # initial trading price of securities
         self.ticker = ticker
         self.oid = 0
@@ -198,11 +198,12 @@ class BasicHandler(tornado.web.RequestHandler):
     def check_origin(self, origin):
         return True
 
+
 class BasicWebsocketHandler(tornado.websocket.WebSocketHandler):
     def check_origin(self, origin):
         return True
 
-class OrderHandler(BasicWebsocketHandler):
+class OrderHandler(BasicHandler):
     def get(self):
         try:
             self.post() ### for benchmarks            
@@ -220,18 +221,20 @@ class OrderHandler(BasicWebsocketHandler):
             if oid:
                 message = prettyprint(oid,order,matches,engine.state())
                 message = repr({'oid':oid,'order':order,'state':engine.state(),'matches':matches})
-                for client in LISTENERS: client.write_message(message)
+                for client in LISTENERS:
+                    print '\nsending',message,'to',client
+                    client.write_message(message)
                 self.write(str(oid))
                 
-class QuoteHandler(BasicWebsocketHandler):
+class QuoteHandler(BasicHandler):
     def get(self):
         self.write(str(engine.price))
 
-class QueryHandler(BasicWebsocketHandler):
-    def get(self):
+class QueryHandler(BasicHandler):
+    def get(self):        
         self.write(repr(engine.state()))
 
-class RealtimeHandler(BasicHandler):
+class RealtimeHandler(BasicWebsocketHandler):
     def open(self):
         LISTENERS.append(self)
         print 'client connected via websocket'
@@ -265,7 +268,8 @@ if __name__ == "__main__":
         (r'/query', QueryHandler),
         (r'/realtime', RealtimeHandler)]
     engine = Engine(options.ticker)
+    time.sleep(0.001)
     application = tornado.web.Application(urls, auto_reload=True)
     http_server = tornado.httpserver.HTTPServer(application)
     http_server.listen(int(options.port))
-    tornado.ioloop.IOLoop.instance().start()
+    tornado.ioloop.IOLoop.current().start()

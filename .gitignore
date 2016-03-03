@@ -1,0 +1,5 @@
+
+sessions/
+databases/*.sqlite
+modules/*.log
+modules/*.idx
